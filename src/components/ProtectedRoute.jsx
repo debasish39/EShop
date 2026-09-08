@@ -118,7 +118,7 @@ export default function ProtectedRoute({
   if (!isAuthenticated) {
     return (
       <Navigate
-        to="/sign-in"
+        to="/phone-login"
         state={{
           from: location,
         }}

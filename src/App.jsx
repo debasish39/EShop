@@ -972,14 +972,14 @@ const AppWrapper = () => {
               <Route
                 path="/sign-in/*"
                 element={
-                  <SignInPage />
+                  <PhoneLogin />
                 }
               />
 
               <Route
                 path="/sign-up/*"
                 element={
-                  <SignUpPage />
+                  <PhoneLogin />
                 }
               />
 
@@ -990,6 +990,13 @@ const AppWrapper = () => {
 
               <Route
                 path="/"
+                element={
+                  <Home />
+                }
+              />
+
+              <Route
+                path="/home"
                 element={
                   <Home />
                 }

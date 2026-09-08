@@ -5,7 +5,7 @@ import {
 } from "firebase/auth";
 
 import { auth } from "../firebase/firebase";
-import AuthLayout from "../components/AuthLayout";
+import { useNavigate } from "react-router-dom";
 
 import {
   FaArrowRight,
@@ -23,6 +23,7 @@ export default function PhoneLogin() {
      NAVIGATION
   ===================================================== */
 
+  const navigate = useNavigate();
   const recaptchaVerifierRef = useRef(null);
   const recaptchaWidgetIdRef = useRef(null);
   const otpRefs = useRef([]);
@@ -92,10 +93,6 @@ export default function PhoneLogin() {
           recaptchaVerifierRef.current.clear();
         }
       } catch (error) {
-        console.log(
-          "Recaptcha cleanup:",
-          error
-        );
       }
 
       recaptchaVerifierRef.current = null;
@@ -173,15 +170,9 @@ export default function PhoneLogin() {
         size: "invisible",
 
         callback: () => {
-          console.log(
-            "reCAPTCHA verified"
-          );
         },
 
         "expired-callback": () => {
-          console.log(
-            "reCAPTCHA expired"
-          );
 
           toast.error(
             "reCAPTCHA expired. Please try again."
@@ -189,9 +180,6 @@ export default function PhoneLogin() {
         },
 
         "error-callback": () => {
-          console.log(
-            "reCAPTCHA error"
-          );
         },
       }
     );
@@ -205,21 +193,13 @@ export default function PhoneLogin() {
       recaptchaWidgetIdRef.current =
         widgetId;
 
-      console.log(
-        "reCAPTCHA rendered:",
-        widgetId
-      );
-
       return verifier;
     } catch (error) {
-      console.error(
-        "reCAPTCHA render error:",
-        error
-      );
 
       try {
         verifier.clear();
-      } catch {}
+      } catch (error) {
+      }
 
       recaptchaVerifierRef.current = null;
       recaptchaWidgetIdRef.current = null;
@@ -250,10 +230,6 @@ export default function PhoneLogin() {
         );
       }
     } catch (error) {
-      console.log(
-        "reCAPTCHA reset error:",
-        error
-      );
     }
   };
 
@@ -269,10 +245,6 @@ export default function PhoneLogin() {
         recaptchaVerifierRef.current.clear();
       }
     } catch (error) {
-      console.log(
-        "reCAPTCHA destroy error:",
-        error
-      );
     }
 
     recaptchaVerifierRef.current = null;
@@ -304,11 +276,6 @@ export default function PhoneLogin() {
         .replace(/\s/g, "")
         .trim();
 
-      console.log(
-        "Sending OTP to:",
-        cleanedPhone
-      );
-
       /*
        * Create reCAPTCHA only once.
        */
@@ -324,11 +291,6 @@ export default function PhoneLogin() {
           cleanedPhone,
           appVerifier
         );
-
-      console.log(
-        "Firebase confirmation result:",
-        confirmation
-      );
 
       setConfirmationResult(
         confirmation
@@ -350,10 +312,6 @@ export default function PhoneLogin() {
         otpRefs.current[0]?.focus();
       }, 200);
     } catch (error) {
-      console.error(
-        "Firebase phone OTP error:",
-        error
-      );
 
       /*
        * Reset reCAPTCHA instead of
@@ -445,11 +403,6 @@ export default function PhoneLogin() {
 
       setFirebaseUser(user);
 
-      console.log(
-        "Firebase user:",
-        user
-      );
-
       /*
        * Get Firebase ID token.
        */
@@ -457,10 +410,6 @@ export default function PhoneLogin() {
         await user.getIdToken(true);
 
       setFirebaseIdToken(idToken);
-
-      console.log(
-        "Firebase ID token received"
-      );
 
       /*
        * Send Firebase token to
@@ -502,11 +451,6 @@ export default function PhoneLogin() {
             "Unable to login"
         );
       }
-
-      console.log(
-        "Odikart auth response:",
-        data
-      );
 
       /* =================================================
          NEW USER
@@ -585,10 +529,6 @@ export default function PhoneLogin() {
 
       window.location.href = "/";
     } catch (error) {
-      console.error(
-        "OTP verification error:",
-        error
-      );
 
       let message =
         "Invalid OTP";
@@ -815,10 +755,6 @@ export default function PhoneLogin() {
         otpRefs.current[0]?.focus();
       }, 200);
     } catch (error) {
-      console.error(
-        "Resend OTP error:",
-        error
-      );
 
       resetRecaptcha();
 
@@ -1026,10 +962,6 @@ export default function PhoneLogin() {
 
         window.location.href = "/";
       } catch (error) {
-        console.error(
-          "Complete profile error:",
-          error
-        );
 
         toast.error(
           error?.message ||
@@ -1069,760 +1001,1571 @@ export default function PhoneLogin() {
   };
 
   /* =====================================================
+     SKIP LOGIN
+  ===================================================== */
+
+  const handleSkip = () => {
+    navigate("/");
+  };
+
+  /* =====================================================
      UI
+     Premium Indigo + Purple Odikart ecommerce design
+     Uses the real /logo.png from public/
   ===================================================== */
 
   return (
-    <AuthLayout title="Welcome Back">
+    <div className="odikart-auth">
+      <button
+        type="button"
+        className="skip-login-btn"
+        onClick={handleSkip}
+        aria-label="Skip login and continue shopping"
+      >
+        Skip
+        <FaArrowRight size={11} />
+      </button>
+
       <style>{`
-        .phone-root * {
-          font-family:
-            'Plus Jakarta Sans',
-            sans-serif;
-        }
-
-        .phone-root {
-          animation:
-            phoneFade .4s ease;
-        }
-
-        @keyframes phoneFade {
-          from {
-            opacity: 0;
-            transform: translateY(8px);
-          }
-
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .phone-icon {
-          width: 58px;
-          height: 58px;
-          border-radius: 18px;
-
+        .odikart-auth {
+          --indigo-950: #17144f;
+          --indigo-900: #211b68;
+          --indigo-800: #312e81;
+          --purple-700: #6d28d9;
+          --purple-600: #7c3aed;
+          --purple-500: #8b5cf6;
+          --ink: #111827;
+          --muted: #718096;
+          min-height: 100vh;
+          width: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-
-          margin: 0 auto 18px;
-
-          color: white;
-
+          padding: 28px;
+          box-sizing: border-box;
+          overflow: hidden;
           background:
-            linear-gradient(
-              135deg,
-              #4f46e5,
-              #2563eb,
-              #7c3aed
-            );
+            radial-gradient(circle at 12% 15%, rgba(124,58,237,.16), transparent 28%),
+            radial-gradient(circle at 90% 85%, rgba(79,70,229,.14), transparent 32%),
+            #f7f7fb;
+          color: var(--ink);
+          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
 
+        .skip-login-btn {
+          position: fixed;
+          top: 20px;
+          right: 24px;
+          z-index: 100;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 7px;
+          min-width: 76px;
+          height: 38px;
+          padding: 0 14px;
+          border: 1px solid rgba(255,255,255,.24);
+          border-radius: 999px;
+          color: #fff;
+          background: rgba(23,20,79,.72);
+          box-shadow: 0 10px 28px rgba(23,20,79,.20);
+          backdrop-filter: blur(14px);
+          font-size: 12px;
+          font-weight: 800;
+          cursor: pointer;
+          transition: .2s ease;
+        }
+
+        .skip-login-btn:hover {
+          transform: translateY(-1px);
+          background: rgba(23,20,79,.88);
+          box-shadow: 0 14px 32px rgba(23,20,79,.28);
+        }
+
+        .skip-login-btn:active {
+          transform: translateY(0);
+        }
+
+        .odikart-auth-shell {
+          position: relative;
+          width: min(1180px, 100%);
+          min-height: 760px;
+          display: grid;
+          grid-template-columns: 1.05fr .95fr;
+          overflow: hidden;
+          border-radius: 34px;
+          background: #fff;
+          border: 1px solid rgba(31, 27, 91, .08);
           box-shadow:
-            0 12px 30px
-            rgba(79,70,229,.28);
+            0 35px 100px rgba(31, 25, 90, .18),
+            0 10px 30px rgba(31, 25, 90, .08);
         }
 
-        .phone-title {
-          font-size: 23px;
-          font-weight: 700;
-          color: #1e1b4b;
-          text-align: center;
-          margin-bottom: 6px;
+        /* ================================
+           PREMIUM HERO
+        ================================= */
+
+        .odikart-banner {
+          position: relative;
+          min-height: 760px;
+          overflow: hidden;
+          color: #fff;
+          background:
+            radial-gradient(circle at 78% 20%, rgba(196,181,253,.25), transparent 24%),
+            radial-gradient(circle at 18% 88%, rgba(99,102,241,.28), transparent 30%),
+            linear-gradient(135deg, #17144f 0%, #28216e 40%, #4c1d95 72%, #7c3aed 100%);
         }
 
-        .phone-desc {
-          font-size: 13px;
-          color: #6b7280;
-          text-align: center;
-          line-height: 1.6;
-          margin-bottom: 22px;
+        .odikart-banner::before {
+          content: "";
+          position: absolute;
+          width: 520px;
+          height: 520px;
+          right: -270px;
+          top: 70px;
+          border-radius: 50%;
+          border: 1px solid rgba(255,255,255,.12);
+          box-shadow:
+            0 0 0 42px rgba(255,255,255,.025),
+            0 0 0 88px rgba(255,255,255,.018);
         }
 
-        .form-group {
-          margin-bottom: 15px;
+        .odikart-banner::after {
+          content: "";
+          position: absolute;
+          width: 380px;
+          height: 380px;
+          left: -230px;
+          bottom: -190px;
+          border-radius: 50%;
+          background: rgba(167,139,250,.18);
+          filter: blur(12px);
         }
 
-        .form-label {
+        .banner-grid {
+          position: absolute;
+          inset: -40px;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 10px;
+          transform: rotate(-7deg) scale(1.1);
+          opacity: .18;
+        }
+
+        .banner-grid-item {
+          min-height: 120px;
+          border: 1px solid rgba(255,255,255,.12);
+          border-radius: 20px;
+          background: rgba(255,255,255,.06);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 42px;
+        }
+
+        .banner-grid-item:nth-child(2n) {
+          transform: translateY(18px);
+        }
+
+        .banner-grid-item:nth-child(3n) {
+          transform: translateY(-15px);
+        }
+
+        .banner-content {
+          position: relative;
+          z-index: 5;
+          height: 100%;
+          min-height: 760px;
+          padding: 58px 54px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
+        .banner-logo {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: fit-content;
+          max-width: 230px;
+          min-height: 68px;
+          padding: 10px 18px;
+          border-radius: 19px;
+          background: rgba(255,255,255,.09);
+          border: 1px solid rgba(255,255,255,.15);
+          backdrop-filter: blur(18px);
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.10),
+            0 15px 40px rgba(0,0,0,.14);
+        }
+
+        .banner-logo img {
           display: block;
-          font-size: 11px;
-          font-weight: 700;
-          color: #6b7280;
-          letter-spacing: .05em;
+          width: auto;
+          max-width: 195px;
+          max-height: 48px;
+          object-fit: contain;
+        }
+
+        .banner-main {
+          margin-top: 35px;
+          max-width: 560px;
+        }
+
+        .premium-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 9px 13px;
+          border-radius: 999px;
+          color: #ede9fe;
+          background: rgba(255,255,255,.08);
+          border: 1px solid rgba(255,255,255,.14);
+          backdrop-filter: blur(12px);
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .09em;
           text-transform: uppercase;
-          margin-bottom: 6px;
         }
 
-        .phone-input {
-          width: 100%;
-          padding: 14px 15px;
-
-          border-radius: 13px;
-
-          border:
-            1.5px solid
-            rgba(99,102,241,.16);
-
-          background: #f8faff;
-
-          color: #1e1b4b;
-
-          font-size: 15px;
-          font-weight: 600;
-
-          outline: none;
-
-          transition:
-            border-color .2s,
-            box-shadow .2s,
-            background .2s;
+        .premium-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #c4b5fd;
+          box-shadow: 0 0 15px rgba(196,181,253,.9);
         }
 
-        .phone-input:focus {
-          background: white;
+        .banner-title {
+          margin: 20px 0 0;
+          font-size: clamp(46px, 4.6vw, 67px);
+          line-height: 1.02;
+          letter-spacing: -.055em;
+          font-weight: 900;
+        }
 
-          border-color: #6366f1;
+        .banner-title span {
+          background: linear-gradient(90deg, #fff, #ddd6fe, #c4b5fd);
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
 
+        .banner-subtitle {
+          max-width: 520px;
+          margin: 22px 0 0;
+          color: rgba(255,255,255,.72);
+          font-size: 17px;
+          line-height: 1.7;
+        }
+
+        .banner-trust {
+          display: flex;
+          align-items: center;
+          gap: 22px;
+          color: rgba(255,255,255,.64);
+          font-size: 11px;
+          font-weight: 650;
+        }
+
+        .banner-trust-item {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+        }
+
+        .banner-trust-icon {
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 9px;
+          color: #ddd6fe;
+          background: rgba(255,255,255,.09);
+          border: 1px solid rgba(255,255,255,.10);
+        }
+
+        /* ================================
+           FLOATING ECOMMERCE PRODUCTS
+        ================================= */
+
+        .products {
+          position: absolute;
+          z-index: 4;
+          inset: 0;
+          pointer-events: none;
+        }
+
+        .product {
+          position: absolute;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 24px;
+          background: rgba(255,255,255,.09);
+          border: 1px solid rgba(255,255,255,.17);
+          backdrop-filter: blur(20px);
           box-shadow:
-            0 0 0 3px
-            rgba(99,102,241,.12);
+            0 25px 55px rgba(12,7,50,.28),
+            inset 0 1px 0 rgba(255,255,255,.10);
         }
 
-        .phone-input.error {
-          border-color: #f43f5e;
+        .product-phone {
+          width: 105px;
+          height: 175px;
+          right: 35px;
+          top: 145px;
+          transform: rotate(9deg);
+        }
+
+        .phone-device {
+          width: 61px;
+          height: 120px;
+          padding: 4px;
+          border-radius: 13px;
+          background: #15142a;
+          border: 1px solid rgba(255,255,255,.28);
+        }
+
+        .phone-screen {
+          height: 100%;
+          border-radius: 10px;
+          background: linear-gradient(160deg, #3730a3, #7c3aed);
+          overflow: hidden;
+          padding-top: 6px;
+        }
+
+        .phone-notch {
+          width: 23px;
+          height: 5px;
+          margin: 0 auto;
+          border-radius: 10px;
+          background: #11111c;
+        }
+
+        .phone-logo {
+          width: 25px;
+          height: 25px;
+          margin: 20px auto 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 7px;
+          background: rgba(255,255,255,.9);
+          overflow: hidden;
+        }
+
+        .phone-logo img {
+          width: 85%;
+          height: 85%;
+          object-fit: contain;
+        }
+
+        .product-headphones {
+          width: 130px;
+          height: 130px;
+          left: 35px;
+          top: 150px;
+          transform: rotate(-8deg);
+        }
+
+        .headphone-shape {
+          position: relative;
+          width: 78px;
+          height: 76px;
+        }
+
+        .headphone-arc {
+          position: absolute;
+          left: 12px;
+          top: 2px;
+          width: 54px;
+          height: 63px;
+          border: 8px solid rgba(255,255,255,.92);
+          border-bottom: 0;
+          border-radius: 50px 50px 0 0;
+        }
+
+        .ear {
+          position: absolute;
+          bottom: 0;
+          width: 25px;
+          height: 37px;
+          border-radius: 11px;
+          background: #fff;
+        }
+
+        .ear.left {
+          left: 0;
+        }
+
+        .ear.right {
+          right: 0;
+        }
+
+        .product-watch {
+          width: 125px;
+          height: 145px;
+          right: 92px;
+          bottom: 135px;
+          transform: rotate(-7deg);
+        }
+
+        .watch-shape {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .watch-band {
+          width: 38px;
+          height: 29px;
+          border-radius: 10px 10px 3px 3px;
+          background: #222237;
+        }
+
+        .watch-band.bottom {
+          border-radius: 3px 3px 10px 10px;
+        }
+
+        .watch-face {
+          width: 64px;
+          height: 64px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 17px;
+          background: linear-gradient(145deg, #312e81, #8b5cf6);
+          border: 4px solid #29283c;
+          box-shadow: 0 12px 25px rgba(0,0,0,.25);
+        }
+
+        .watch-time {
+          font-size: 11px;
+          font-weight: 850;
+          color: #fff;
+        }
+
+        .product-parcel {
+          width: 145px;
+          height: 110px;
+          left: 45px;
+          bottom: 110px;
+          transform: rotate(5deg);
+        }
+
+        .parcel {
+          position: relative;
+          width: 83px;
+          height: 68px;
+        }
+
+        .parcel-top {
+          position: absolute;
+          left: 4px;
+          top: 2px;
+          width: 76px;
+          height: 31px;
+          transform: skewY(-18deg);
+          border-radius: 4px;
+          background: #f3e8ff;
+        }
+
+        .parcel-front {
+          position: absolute;
+          left: 4px;
+          bottom: 0;
+          width: 76px;
+          height: 49px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 4px;
+          background: #e9d5ff;
+        }
+
+        .parcel-front img {
+          width: 46px;
+          max-height: 23px;
+          object-fit: contain;
+        }
+
+        .parcel-tape {
+          position: absolute;
+          top: 2px;
+          left: 38px;
+          width: 12px;
+          height: 65px;
+          background: rgba(124,58,237,.48);
+        }
+
+        .product-bag {
+          width: 120px;
+          height: 125px;
+          right: 220px;
+          bottom: 70px;
+          transform: rotate(7deg);
+        }
+
+        .bag {
+          position: relative;
+          width: 68px;
+          height: 73px;
+        }
+
+        .bag-handle {
+          position: absolute;
+          left: 17px;
+          top: 0;
+          width: 34px;
+          height: 29px;
+          border: 6px solid #fff;
+          border-bottom: 0;
+          border-radius: 30px 30px 0 0;
+        }
+
+        .bag-body {
+          position: absolute;
+          left: 2px;
+          bottom: 0;
+          width: 64px;
+          height: 59px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 7px;
+          background: linear-gradient(145deg, #fff, #ddd6fe);
+        }
+
+        .bag-body span {
+          color: #5127a5;
+          font-size: 28px;
+          font-weight: 950;
+        }
+
+        .product-shoe {
+          width: 115px;
+          height: 95px;
+          right: 240px;
+          top: 85px;
+          transform: rotate(-8deg);
+        }
+
+        .shoe-shape {
+          position: relative;
+          width: 78px;
+          height: 48px;
+        }
+
+        .shoe-upper {
+          position: absolute;
+          left: 5px;
+          bottom: 12px;
+          width: 60px;
+          height: 26px;
+          border-radius: 22px 12px 5px 7px;
+          background: #f5f3ff;
+          transform: skewX(-20deg);
+        }
+
+        .shoe-sole {
+          position: absolute;
+          left: 0;
+          bottom: 7px;
+          width: 76px;
+          height: 9px;
+          border-radius: 10px;
+          background: #c4b5fd;
+        }
+
+        .shoe-line {
+          position: absolute;
+          left: 28px;
+          bottom: 29px;
+          width: 20px;
+          height: 3px;
+          background: #7c3aed;
+          transform: rotate(35deg);
+        }
+
+        /* ================================
+           AUTH PANEL
+        ================================= */
+
+        .auth-panel {
+          position: relative;
+          z-index: 10;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 48px;
+          background:
+            radial-gradient(circle at 100% 0%, rgba(124,58,237,.07), transparent 30%),
+            #fff;
+        }
+
+        .auth-inner {
+          width: min(390px, 100%);
+        }
+
+        .mobile-brand {
+          display: none;
+        }
+
+        .auth-kicker {
+          margin: 0 0 9px;
+          color: #6d28d9;
+          font-size: 11px;
+          font-weight: 850;
+          letter-spacing: .1em;
+          text-transform: uppercase;
+        }
+
+        .auth-title {
+          margin: 0;
+          color: #17144f;
+          font-size: 34px;
+          line-height: 1.05;
+          font-weight: 900;
+          letter-spacing: -.05em;
+        }
+
+        .auth-subtitle {
+          margin: 10px 0 27px;
+          color: #718096;
+          font-size: 13px;
+          line-height: 1.65;
+        }
+
+        .field-label {
+          display: block;
+          margin: 0 0 8px;
+          color: #30384a;
+          font-size: 11px;
+          font-weight: 800;
+        }
+
+        .phone-field {
+          width: 100%;
+          height: 56px;
+          display: flex;
+          align-items: center;
+          overflow: hidden;
+          border: 1px solid #dfe3ed;
+          border-radius: 15px;
+          background: #fff;
+          transition: .18s ease;
+        }
+
+        .phone-field:focus-within {
+          border-color: #7c3aed;
+          box-shadow: 0 0 0 4px rgba(124,58,237,.09);
+        }
+
+        .phone-prefix {
+          height: 100%;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          padding: 0 13px;
+          border-right: 1px solid #eceef4;
+          color: #29205e;
+          font-size: 12px;
+          font-weight: 850;
+          white-space: nowrap;
+        }
+
+        .phone-prefix span {
+          color: #8b94a5;
+          font-size: 9px;
+        }
+
+        .phone-number-input {
+          flex: 1;
+          min-width: 0;
+          height: 100%;
+          padding: 0 13px;
+          border: 0;
+          outline: 0;
+          background: transparent;
+          color: #15182b;
+          font-size: 14px;
+          font-weight: 650;
+        }
+
+        .phone-number-input::placeholder {
+          color: #a7afbd;
+          font-weight: 450;
+        }
+
+        .phone-clear {
+          width: 38px;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 0;
+          background: transparent;
+          color: #7d8798;
+          cursor: pointer;
+          font-size: 18px;
         }
 
         .form-error {
-          color: #f43f5e;
-          font-size: 12px;
-          font-weight: 600;
-          margin-top: 5px;
+          margin: 7px 2px 0;
+          color: #dc2626;
+          font-size: 10px;
+          font-weight: 700;
         }
 
-        .submit-btn {
+        .continue-btn {
           width: 100%;
-
+          height: 55px;
+          margin-top: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
-
-          padding: 14px 0;
-
-          border-radius: 13px;
-
-          border: none;
-
-          background:
-            linear-gradient(
-              135deg,
-              #4f46e5,
-              #2563eb
-            );
-
-          color: white;
-
-          font-size: 14px;
-          font-weight: 700;
-
+          gap: 9px;
+          border: 0;
+          border-radius: 15px;
+          color: #fff;
+          background: linear-gradient(135deg, #4338ca, #7c3aed);
+          box-shadow: 0 14px 28px rgba(109,40,217,.23);
+          font-size: 13px;
+          font-weight: 850;
           cursor: pointer;
-
-          transition:
-            transform .2s,
-            box-shadow .2s;
+          transition: .2s ease;
         }
 
-        .submit-btn:hover {
+        .continue-btn:hover:not(:disabled) {
           transform: translateY(-2px);
-
-          box-shadow:
-            0 12px 30px
-            rgba(79,70,229,.30);
+          box-shadow: 0 18px 34px rgba(109,40,217,.28);
         }
 
-        .submit-btn:disabled {
-          opacity: .6;
+        .continue-btn:disabled {
+          color: #858da0;
+          background: #e9eaf0;
+          box-shadow: none;
           cursor: not-allowed;
-          transform: none;
+        }
+
+        .trust-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 7px;
+          margin-top: 14px;
+          color: #8b94a5;
+          font-size: 10px;
+          font-weight: 650;
+        }
+
+        .trust-icon {
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 7px;
+          color: #6d28d9;
+          background: #f3e8ff;
+        }
+
+        .divider {
+          display: flex;
+          align-items: center;
+          gap: 11px;
+          margin: 20px 0 12px;
+          color: #a0a7b5;
+          font-size: 9px;
+          font-weight: 800;
+        }
+
+        .divider::before,
+        .divider::after {
+          content: "";
+          flex: 1;
+          height: 1px;
+          background: #eceef3;
+        }
+
+        .terms {
+          margin: 0;
+          text-align: center;
+          color: #9aa2b0;
+          font-size: 9px;
+          line-height: 1.6;
+        }
+
+        /* ================================
+           OTP
+        ================================= */
+
+        .otp-back {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          margin-bottom: 21px;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          color: #5530a0;
+          font-size: 11px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+
+        .otp-title,
+        .details-title {
+          margin: 0;
+          color: #17144f;
+          font-size: 31px;
+          line-height: 1.08;
+          font-weight: 900;
+          letter-spacing: -.05em;
+        }
+
+        .otp-desc,
+        .details-desc {
+          margin: 9px 0 0;
+          color: #758095;
+          font-size: 12px;
+          line-height: 1.65;
+        }
+
+        .otp-number {
+          color: #5b21b6;
+          font-weight: 850;
         }
 
         .otp-inputs {
-          display: flex;
-          justify-content: center;
-          gap: 7px;
-          margin: 24px 0 18px;
+          display: grid;
+          grid-template-columns: repeat(6, 1fr);
+          gap: 8px;
+          margin: 28px 0 14px;
         }
 
         .otp-input {
-          width: 43px;
-          height: 50px;
-
-          text-align: center;
-
-          border-radius: 12px;
-
-          border:
-            2px solid
-            rgba(99,102,241,.16);
-
-          background: #f8faff;
-
-          color: #1e1b4b;
-
-          font-size: 18px;
-          font-weight: 700;
-
+          width: 100%;
+          height: 56px;
+          border: 1px solid #dfe3ed;
+          border-radius: 14px;
           outline: none;
-
-          transition: .2s;
+          text-align: center;
+          color: #17144f;
+          background: #fbfbfd;
+          font-size: 20px;
+          font-weight: 900;
+          transition: .18s ease;
         }
 
         .otp-input:focus {
-          background: white;
-
-          border-color: #6366f1;
-
-          box-shadow:
-            0 0 0 3px
-            rgba(99,102,241,.12);
+          border-color: #7c3aed;
+          background: #fff;
+          box-shadow: 0 0 0 4px rgba(124,58,237,.09);
         }
 
-        .verified-box {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-
-          padding: 11px 13px;
-
-          margin-bottom: 15px;
-
-          border-radius: 12px;
-
-          background: #f0fdf4;
-
-          border:
-            1px solid
-            #bbf7d0;
-
-          color: #15803d;
-
-          font-size: 12px;
-          font-weight: 600;
-        }
-
-        .details-title {
-          font-size: 23px;
-          font-weight: 700;
-          color: #1e1b4b;
-          margin-bottom: 5px;
-        }
-
-        .details-desc {
-          font-size: 13px;
-          line-height: 1.6;
-          color: #6b7280;
-          margin-bottom: 20px;
-        }
-
-        .security-note {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 7px;
-
-          margin-top: 15px;
-
-          font-size: 11px;
-          color: #9ca3af;
-        }
-
-        .resend-row {
+        .otp-status {
+          min-height: 18px;
           text-align: center;
-
-          font-size: 12px;
-
-          color: #6b7280;
-
-          margin-bottom: 14px;
+          color: #8b94a5;
+          font-size: 10px;
+          font-weight: 650;
         }
 
         .resend-btn {
-          border: none;
-          background: none;
-
-          color: #6366f1;
-
-          font-weight: 700;
-
+          padding: 0;
+          border: 0;
+          background: transparent;
+          color: #6d28d9;
+          font-weight: 850;
           cursor: pointer;
         }
 
         .resend-btn:disabled {
-          color: #9ca3af;
+          color: #9aa2b0;
           cursor: not-allowed;
         }
 
-        .back-btn {
+        .otp-security {
+          display: flex;
+          align-items: flex-start;
+          gap: 9px;
+          margin-top: 25px;
+          padding: 13px;
+          border: 1px solid #eadffb;
+          border-radius: 13px;
+          background: #faf7ff;
+          color: #74658c;
+          font-size: 9px;
+          line-height: 1.6;
+        }
+
+        .otp-security svg {
+          flex: 0 0 auto;
+          margin-top: 1px;
+          color: #7c3aed;
+        }
+
+        /* ================================
+           PROFILE
+        ================================= */
+
+        .verified-box {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          margin: 19px 0 18px;
+          padding: 11px 12px;
+          border: 1px solid #dfd5f8;
+          border-radius: 11px;
+          background: #faf8ff;
+          color: #5b21b6;
+          font-size: 10px;
+          font-weight: 800;
+        }
+
+        .details-field {
+          margin-bottom: 13px;
+        }
+
+        .details-label {
+          display: block;
+          margin: 0 0 7px;
+          color: #354055;
+          font-size: 10px;
+          font-weight: 800;
+        }
+
+        .details-input {
           width: 100%;
-
-          margin-top: 12px;
-
-          padding: 11px;
-
-          border: none;
-
+          height: 49px;
+          padding: 0 12px;
+          border: 1px solid #dfe3ed;
           border-radius: 12px;
-
-          background: #eef2ff;
-
-          color: #4f46e5;
-
+          outline: 0;
+          color: #15182b;
+          background: #fff;
           font-size: 12px;
-          font-weight: 700;
-
-          cursor: pointer;
+          transition: .18s ease;
         }
 
-        .back-btn:hover {
-          background: #e0e7ff;
+        .details-input:focus {
+          border-color: #7c3aed;
+          box-shadow: 0 0 0 4px rgba(124,58,237,.08);
         }
 
-        /*
-         * Keep reCAPTCHA container present but
-         * invisible to the normal UI.
-         */
-        #recaptcha-container {
+        .details-input.error {
+          border-color: #ef4444;
+        }
+
+        .recaptcha-wrap {
           min-height: 0;
         }
 
-        @media(max-width:400px) {
-          .otp-input {
-            width: 39px;
-            height: 46px;
+        @media (max-width: 980px) {
+          .odikart-auth-shell {
+            grid-template-columns: 1fr;
+            max-width: 500px;
+            min-height: auto;
+          }
+
+          .odikart-banner {
+            min-height: 310px;
+          }
+
+          .banner-content {
+            min-height: 310px;
+            padding: 32px;
+          }
+
+          .banner-main {
+            margin-top: 18px;
+          }
+
+          .banner-title {
+            font-size: 40px;
+          }
+
+          .banner-subtitle,
+          .banner-trust {
+            display: none;
+          }
+
+          .products {
+            opacity: .65;
+          }
+
+          .product-phone {
+            right: 50px;
+            top: 55px;
+          }
+
+          .product-headphones {
+            left: 30px;
+            top: 95px;
+          }
+
+          .product-watch,
+          .product-parcel,
+          .product-bag,
+          .product-shoe {
+            display: none;
+          }
+
+          .auth-panel {
+            padding: 30px;
+          }
+
+          .mobile-brand {
+            display: flex;
+            margin-bottom: 25px;
+          }
+
+          .mobile-brand img {
+            max-width: 150px;
+            max-height: 38px;
+            object-fit: contain;
+          }
+        }
+
+        @media (max-width: 560px) {
+          .skip-login-btn {
+            top: 14px;
+            right: 14px;
+            min-width: 68px;
+            height: 34px;
+            padding: 0 11px;
+            font-size: 11px;
+          }
+
+          .odikart-auth {
+            min-height: 100dvh;
+            padding: 0;
+            align-items: stretch;
+          }
+
+          .odikart-auth-shell {
+            width: 100%;
+            max-width: none;
+            min-height: 100dvh;
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+          }
+
+          .odikart-banner {
+            min-height: 255px;
+          }
+
+          .banner-content {
+            min-height: 255px;
+            padding: 24px 22px;
+          }
+
+          .banner-logo {
+            min-height: 53px;
+            padding: 8px 13px;
+            border-radius: 15px;
+          }
+
+          .banner-logo img {
+            max-width: 150px;
+            max-height: 35px;
+          }
+
+          .banner-main {
+            margin-top: 16px;
+          }
+
+          .premium-badge {
+            padding: 7px 10px;
+            font-size: 8px;
+          }
+
+          .banner-title {
+            margin-top: 13px;
+            font-size: 31px;
+          }
+
+          .product-phone {
+            width: 85px;
+            height: 140px;
+            right: 12px;
+            top: 48px;
+          }
+
+          .product-headphones {
+            width: 95px;
+            height: 95px;
+            left: 5px;
+            top: 100px;
+          }
+
+          .auth-panel {
+            align-items: flex-start;
+            padding: 28px 20px 35px;
+          }
+
+          .auth-inner {
+            width: 100%;
+          }
+
+          .auth-title {
+            font-size: 29px;
+          }
+
+          .auth-subtitle {
+            margin-bottom: 22px;
           }
 
           .otp-inputs {
             gap: 5px;
           }
+
+          .otp-input {
+            height: 50px;
+            border-radius: 11px;
+          }
+        }
+
+        @media (max-width: 380px) {
+          .banner-title {
+            font-size: 27px;
+          }
+
+          .auth-panel {
+            padding-left: 16px;
+            padding-right: 16px;
+          }
+
+          .otp-input {
+            height: 46px;
+            font-size: 18px;
+          }
         }
       `}</style>
 
-      <div className="phone-root">
+      <div className="odikart-auth-shell">
+        <section className="odikart-banner">
+          <div className="banner-grid" aria-hidden="true">
+            <div className="banner-grid-item">📱</div>
+            <div className="banner-grid-item">🎧</div>
+            <div className="banner-grid-item">⌚</div>
+            <div className="banner-grid-item">💻</div>
+            <div className="banner-grid-item">👟</div>
+            <div className="banner-grid-item">👜</div>
+            <div className="banner-grid-item">📷</div>
+            <div className="banner-grid-item">🎮</div>
+          </div>
 
-        {/* =================================================
-            PHONE
-        ================================================= */}
+          <div className="banner-content">
+            <div>
+              <div className="banner-logo">
+                <img src="/logo.png" alt="Odikart" />
+              </div>
 
-        {step === "phone" && (
-          <form onSubmit={sendOTP}>
-
-            <div className="phone-icon">
-              <FaPhoneAlt size={20} />
-            </div>
-
-            <h2 className="phone-title">
-              Continue with Phone
-            </h2>
-
-            <p className="phone-desc">
-              Enter your mobile number and
-              we'll send you a secure OTP.
-            </p>
-
-            <div className="form-group">
-
-              <label className="form-label">
-                Mobile Number
-              </label>
-
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => {
-                  let value =
-                    e.target.value;
-
-                  /*
-                   * Keep +91 prefix.
-                   */
-                  if (
-                    !value.startsWith(
-                      "+91"
-                    )
-                  ) {
-                    value =
-                      "+91 " +
-                      value
-                        .replace(
-                          /^\+91\s?/,
-                          ""
-                        );
-                  }
-
-                  setPhone(value);
-
-                  setErrors({});
-                }}
-                placeholder="+91 9876543210"
-                className={`phone-input ${
-                  errors.phone
-                    ? "error"
-                    : ""
-                }`}
-                autoComplete="tel"
-              />
-
-              {errors.phone && (
-                <div className="form-error">
-                  {errors.phone}
+              <div className="banner-main">
+                <div className="premium-badge">
+                  <span className="premium-dot"></span>
+                  Premium shopping experience
                 </div>
-              )}
 
+                <h2 className="banner-title">
+                  Everything You Need.
+                  <br />
+                  <span>One Smart Cart.</span>
+                </h2>
+
+                <p className="banner-subtitle">
+                  Shop electronics, fashion, lifestyle & more at great prices.
+                  Discover a smarter way to shop with Odikart.
+                </p>
+              </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="submit-btn"
-            >
-              {loading
-                ? "Sending OTP..."
-                : (
-                  <>
-                    Send OTP
+            <div className="banner-trust">
+              <div className="banner-trust-item">
+                <span className="banner-trust-icon">
+                  <FaShieldAlt size={11} />
+                </span>
+                Secure
+              </div>
 
-                    <FaArrowRight
-                      size={12}
+              <div className="banner-trust-item">
+                <span className="banner-trust-icon">
+                  <FaCheckCircle size={11} />
+                </span>
+                Trusted
+              </div>
+
+              <div className="banner-trust-item">
+                <span className="banner-trust-icon">
+                  <FaArrowRight size={11} />
+                </span>
+                Simple
+              </div>
+            </div>
+          </div>
+
+          <div className="products" aria-hidden="true">
+            <div className="product product-headphones">
+              <div className="headphone-shape">
+                <div className="headphone-arc"></div>
+                <div className="ear left"></div>
+                <div className="ear right"></div>
+              </div>
+            </div>
+
+            <div className="product product-phone">
+              <div className="phone-device">
+                <div className="phone-screen">
+                  <div className="phone-notch"></div>
+                  <div className="phone-logo">
+                    <img src="/logo.png" alt="" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="product product-watch">
+              <div className="watch-shape">
+                <div className="watch-band"></div>
+                <div className="watch-face">
+                  <span className="watch-time">10:09</span>
+                </div>
+                <div className="watch-band bottom"></div>
+              </div>
+            </div>
+
+            <div className="product product-parcel">
+              <div className="parcel">
+                <div className="parcel-top"></div>
+                <div className="parcel-front">
+                  <img src="/logo.png" alt="" />
+                </div>
+                <div className="parcel-tape"></div>
+              </div>
+            </div>
+
+            <div className="product product-bag">
+              <div className="bag">
+                <div className="bag-handle"></div>
+                <div className="bag-body">
+                  <span>O</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="product product-shoe">
+              <div className="shoe-shape">
+                <div className="shoe-upper"></div>
+                <div className="shoe-sole"></div>
+                <div className="shoe-line"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="auth-panel">
+          <div className="auth-inner">
+            <div className="mobile-brand">
+              <img src="/logo.png" alt="Odikart" />
+            </div>
+
+            {step === "phone" && (
+              <>
+                <p className="auth-kicker">Welcome to Odikart</p>
+
+                <h1 className="auth-title">
+                  Shop smarter.
+                </h1>
+
+                <p className="auth-subtitle">
+                  Log in or sign up with your mobile number to continue
+                  shopping.
+                </p>
+
+                <form onSubmit={sendOTP}>
+                  <label className="field-label">
+                    Mobile Number
+                  </label>
+
+                  <div className="phone-field">
+                    <div className="phone-prefix">
+                      +91 <span>⌄</span>
+                    </div>
+
+                    <input
+                      type="tel"
+                      value={phone.replace(/^\+91\s?/, "")}
+                      onChange={(e) => {
+                        const digits = e.target.value
+                          .replace(/\D/g, "")
+                          .slice(0, 10);
+
+                        setPhone(`+91 ${digits}`);
+                        setErrors({});
+                      }}
+                      placeholder="Enter phone number"
+                      className="phone-number-input"
+                      autoComplete="tel-national"
+                      inputMode="numeric"
+                      aria-label="Phone Number"
                     />
-                  </>
-                )}
-            </button>
 
-            <div className="security-note">
-              <FaShieldAlt />
+                    {phone.replace(/\D/g, "").length > 2 && (
+                      <button
+                        type="button"
+                        className="phone-clear"
+                        aria-label="Clear phone number"
+                        onClick={() => {
+                          setPhone("+91 ");
+                          setErrors({});
+                        }}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
 
-              Your phone number is securely verified
-            </div>
+                  {errors.phone && (
+                    <div className="form-error">
+                      {errors.phone}
+                    </div>
+                  )}
 
-          </form>
-        )}
-
-        {/* =================================================
-            OTP
-        ================================================= */}
-
-        {step === "otp" && (
-          <div>
-
-            <div className="phone-icon">
-              <FaShieldAlt size={21} />
-            </div>
-
-            <h2 className="phone-title">
-              Verify Your Number
-            </h2>
-
-            <p className="phone-desc">
-              Enter the 6-digit OTP sent to
-
-              <br />
-
-              <strong>
-                {phone}
-              </strong>
-            </p>
-
-            <div className="otp-inputs">
-
-              {otp.map(
-                (digit, index) => (
-                  <input
-                    key={index}
-
-                    ref={(el) => {
-                      otpRefs.current[
-                        index
-                      ] = el;
-                    }}
-
-                    className="otp-input"
-
-                    type="text"
-
-                    inputMode="numeric"
-
-                    maxLength={1}
-
-                    value={digit}
-
-                    onChange={(e) =>
-                      handleOtpChange(
-                        e.target.value,
-                        index
+                  <button
+                    type="submit"
+                    disabled={
+                      loading ||
+                      !/^\+91[6-9]\d{9}$/.test(
+                        phone.replace(/\s/g, "").trim()
                       )
                     }
+                    className="continue-btn"
+                  >
+                    {loading ? "Sending OTP..." : "Continue"}
+                    {!loading && <FaArrowRight size={11} />}
+                  </button>
 
-                    onKeyDown={(e) =>
-                      handleOtpKeyDown(
-                        e,
-                        index
-                      )
-                    }
+                  <div className="trust-row">
+                    <span className="trust-icon">
+                      <FaShieldAlt size={9} />
+                    </span>
+                    Secure OTP verification
+                  </div>
 
-                    onPaste={
-                      index === 0
-                        ? handleOtpPaste
-                        : undefined
-                    }
+                  <div className="divider">SAFE & SECURE</div>
 
-                    autoComplete={
-                      index === 0
-                        ? "one-time-code"
-                        : "off"
-                    }
-                  />
-                )
-              )}
+                  <p className="terms">
+                    By continuing, you agree to receive a verification code
+                    on your mobile number.
+                  </p>
+                </form>
+              </>
+            )}
 
-            </div>
-
-            <div className="resend-row">
-
-              {timer > 0 ? (
-                <>
-                  Resend OTP in{" "}
-
-                  <strong>
-                    {timer}s
-                  </strong>
-                </>
-              ) : (
+            {step === "otp" && (
+              <div>
                 <button
                   type="button"
-                  className="resend-btn"
-                  onClick={
-                    resendOTP
-                  }
+                  className="otp-back"
+                  onClick={backToPhone}
                   disabled={loading}
                 >
-                  Resend OTP
+                  ← Change mobile number
                 </button>
-              )}
 
-            </div>
+                <p className="auth-kicker">Secure verification</p>
 
-            <button
-              type="button"
-              className="back-btn"
-              onClick={
-                backToPhone
-              }
-              disabled={loading}
-            >
-              ← Change Number
-            </button>
+                <h1 className="otp-title">
+                  Enter your OTP
+                </h1>
 
-          </div>
-        )}
+                <p className="otp-desc">
+                  We've sent a verification code to{" "}
+                  <span className="otp-number">{phone}</span>
+                </p>
 
-        {/* =================================================
-            PROFILE
-        ================================================= */}
+                <div className="otp-inputs">
+                  {otp.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => {
+                        otpRefs.current[index] = el;
+                      }}
+                      className="otp-input"
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) =>
+                        handleOtpChange(e.target.value, index)
+                      }
+                      onKeyDown={(e) =>
+                        handleOtpKeyDown(e, index)
+                      }
+                      onPaste={
+                        index === 0
+                          ? handleOtpPaste
+                          : undefined
+                      }
+                      autoComplete={
+                        index === 0
+                          ? "one-time-code"
+                          : "off"
+                      }
+                      aria-label={`OTP digit ${index + 1}`}
+                    />
+                  ))}
+                </div>
 
-        {step === "details" && (
-          <form
-            onSubmit={
-              completeProfile
-            }
-          >
+                <div className="otp-status">
+                  {timer > 0 ? (
+                    <>Resend OTP in {timer}s</>
+                  ) : (
+                    <button
+                      type="button"
+                      className="resend-btn"
+                      onClick={resendOTP}
+                      disabled={loading}
+                    >
+                      Resend OTP
+                    </button>
+                  )}
+                </div>
 
-            <div className="phone-icon">
-              <FaCheckCircle size={21} />
-            </div>
+                <div className="otp-security">
+                  <FaShieldAlt size={12} />
+                  <span>
+                    Your verification is protected by secure Firebase
+                    phone authentication. The code will verify
+                    automatically after all digits are entered.
+                  </span>
+                </div>
+              </div>
+            )}
 
-            <h2 className="details-title">
-              Almost there! 🎉
-            </h2>
+            {step === "details" && (
+              <form onSubmit={completeProfile}>
+                <p className="auth-kicker">Almost there</p>
 
-            <p className="details-desc">
-              Your phone number is verified.
-              Tell us a little about yourself
-              to finish creating your account.
-            </p>
+                <h1 className="details-title">
+                  Complete your profile
+                </h1>
 
-            <div className="verified-box">
-              <FaCheckCircle size={13} />
+                <p className="details-desc">
+                  Your mobile number is verified. Add your details to
+                  finish setting up Odikart.
+                </p>
 
-              {phone} · Phone verified
-            </div>
+                <div className="verified-box">
+                  <FaCheckCircle size={11} />
+                  {phone} · Verified
+                </div>
 
-            {/* FIRST + LAST */}
+                <div className="details-field">
+                  <label className="details-label">
+                    First Name
+                  </label>
+
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={form.firstName}
+                    onChange={handleDetailsChange}
+                    placeholder="First name"
+                    className={`details-input ${
+                      errors.firstName ? "error" : ""
+                    }`}
+                    autoComplete="given-name"
+                  />
+
+                  {errors.firstName && (
+                    <div className="form-error">
+                      {errors.firstName}
+                    </div>
+                  )}
+                </div>
+
+                <div className="details-field">
+                  <label className="details-label">
+                    Last Name
+                  </label>
+
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={form.lastName}
+                    onChange={handleDetailsChange}
+                    placeholder="Last name"
+                    className={`details-input ${
+                      errors.lastName ? "error" : ""
+                    }`}
+                    autoComplete="family-name"
+                  />
+
+                  {errors.lastName && (
+                    <div className="form-error">
+                      {errors.lastName}
+                    </div>
+                  )}
+                </div>
+
+                <div className="details-field">
+                  <label className="details-label">
+                    Email{" "}
+                    <span
+                      style={{
+                        color: "#9aa2b0",
+                        fontWeight: 500,
+                      }}
+                    >
+                      (optional)
+                    </span>
+                  </label>
+
+                  <input
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleDetailsChange}
+                    placeholder="you@example.com"
+                    className={`details-input ${
+                      errors.email ? "error" : ""
+                    }`}
+                    autoComplete="email"
+                  />
+
+                  {errors.email && (
+                    <div className="form-error">
+                      {errors.email}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="continue-btn"
+                >
+                  {loading
+                    ? "Creating Account..."
+                    : "Finish & Continue"}
+                  {!loading && <FaArrowRight size={11} />}
+                </button>
+              </form>
+            )}
 
             <div
-              style={{
-                display: "grid",
-
-                gridTemplateColumns:
-                  "1fr 1fr",
-
-                gap: 10,
-              }}
-            >
-
-              {/* FIRST NAME */}
-
-              <div className="form-group">
-
-                <label className="form-label">
-                  First Name
-                </label>
-
-                <input
-                  type="text"
-                  name="firstName"
-                  value={
-                    form.firstName
-                  }
-                  onChange={
-                    handleDetailsChange
-                  }
-                  placeholder="First name"
-                  className={`phone-input ${
-                    errors.firstName
-                      ? "error"
-                      : ""
-                  }`}
-                  autoComplete="given-name"
-                />
-
-                {errors.firstName && (
-                  <div className="form-error">
-                    {
-                      errors.firstName
-                    }
-                  </div>
-                )}
-
-              </div>
-
-              {/* LAST NAME */}
-
-              <div className="form-group">
-
-                <label className="form-label">
-                  Last Name
-                </label>
-
-                <input
-                  type="text"
-                  name="lastName"
-                  value={
-                    form.lastName
-                  }
-                  onChange={
-                    handleDetailsChange
-                  }
-                  placeholder="Last name"
-                  className={`phone-input ${
-                    errors.lastName
-                      ? "error"
-                      : ""
-                  }`}
-                  autoComplete="family-name"
-                />
-
-                {errors.lastName && (
-                  <div className="form-error">
-                    {
-                      errors.lastName
-                    }
-                  </div>
-                )}
-
-              </div>
-
-            </div>
-
-            {/* EMAIL */}
-
-            <div className="form-group">
-
-              <label className="form-label">
-
-                Email Address
-
-                <span
-                  style={{
-                    marginLeft: 5,
-                    color: "#9ca3af",
-                    fontWeight: 500,
-                    textTransform:
-                      "none",
-                  }}
-                >
-                  (optional)
-                </span>
-
-              </label>
-
-              <input
-                type="email"
-                name="email"
-                value={
-                  form.email
-                }
-                onChange={
-                  handleDetailsChange
-                }
-                placeholder="you@example.com"
-                className={`phone-input ${
-                  errors.email
-                    ? "error"
-                    : ""
-                }`}
-                autoComplete="email"
-              />
-
-              {errors.email && (
-                <div className="form-error">
-                  {errors.email}
-                </div>
-              )}
-
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="submit-btn"
-            >
-              {loading
-                ? "Creating Account..."
-                : (
-                  <>
-                    Continue
-
-                    <FaArrowRight
-                      size={12}
-                    />
-                  </>
-                )}
-            </button>
-
-          </form>
-        )}
-
-        {/* =================================================
-            FIREBASE RECAPTCHA
-        ================================================= */}
-
-        <div
-          id="recaptcha-container"
-        />
-
+              id="recaptcha-container"
+              className="recaptcha-wrap"
+            />
+          </div>
+        </section>
       </div>
-
-    </AuthLayout>
+    </div>
   );
 }
