@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import { toast } from "sonner";
 import { AccountShell, api } from "./AccountShell";
+import { useNavigate } from "react-router-dom";
 
 /* ============================================================
    ADD ADDRESS PAGE
@@ -40,7 +41,7 @@ export default function AddAddressPage() {
   });
 
   const [saving, setSaving] = useState(false);
-
+  const navigate = useNavigate();
   const set = (key, value) => {
     setF((prev) => ({
       ...prev,
@@ -133,9 +134,7 @@ export default function AddAddressPage() {
         response?.message || "Address saved successfully"
       );
 
-      setTimeout(() => {
-        window.location.href = "/account/addresses";
-      }, 700);
+      navigate("/account/addresses");
     } catch (error) {
       console.error("Save address error:", error);
 
@@ -868,8 +867,7 @@ export function AddressForm({
               className="ok-btn ok-outline cancel-btn"
               disabled={saving}
               onClick={() =>
-                (window.location.href =
-                  "/account/addresses")
+                navigate("/account/addresses")
               }
             >
               Cancel

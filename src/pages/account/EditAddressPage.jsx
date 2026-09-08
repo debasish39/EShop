@@ -22,7 +22,6 @@ export default function EditAddressPage() {
       try {
         setLoading(true);
 
-        // Backend: GET /api/addresses
         const d = await api("/api/addresses");
 
         const addresses =
@@ -33,17 +32,15 @@ export default function EditAddressPage() {
         const address = addresses.find(
           (item) =>
             String(item._id || item.id) ===
-            String(id),
+            String(id)
         );
 
         if (!address) {
           throw new Error(
-            "Address not found",
+            "Address not found"
           );
         }
 
-        // Normalize backend address into
-        // the exact fields expected by AddressForm.
         setF({
           label:
             address.label || "Home",
@@ -69,8 +66,6 @@ export default function EditAddressPage() {
           area:
             address.area || "",
 
-          // IMPORTANT:
-          // Keep village editable.
           village:
             address.village || "",
 
@@ -101,12 +96,12 @@ export default function EditAddressPage() {
       } catch (e) {
         console.error(
           "Load address error:",
-          e,
+          e
         );
 
         toast.error(
           e.message ||
-            "Failed to load address",
+            "Failed to load address"
         );
       } finally {
         setLoading(false);
@@ -119,7 +114,7 @@ export default function EditAddressPage() {
       setLoading(false);
 
       toast.error(
-        "Invalid address ID",
+        "Invalid address ID"
       );
     }
   }, [id]);
@@ -142,14 +137,14 @@ export default function EditAddressPage() {
   const save = async () => {
     if (!id) {
       toast.error(
-        "Invalid address ID",
+        "Invalid address ID"
       );
       return;
     }
 
     if (!f) {
       toast.error(
-        "Address data is not available",
+        "Address data is not available"
       );
       return;
     }
@@ -162,74 +157,72 @@ export default function EditAddressPage() {
       const payload = {
         label:
           String(
-            f.label || "Home",
+            f.label || "Home"
           ).trim(),
 
         fullName:
           String(
-            f.fullName || "",
+            f.fullName || ""
           ).trim(),
 
         phone:
           String(
-            f.phone || "",
+            f.phone || ""
           ).trim(),
 
         alternatePhone:
           String(
-            f.alternatePhone || "",
+            f.alternatePhone || ""
           ).trim(),
 
         addressLine1:
           String(
-            f.addressLine1 || "",
+            f.addressLine1 || ""
           ).trim(),
 
         addressLine2:
           String(
-            f.addressLine2 || "",
+            f.addressLine2 || ""
           ).trim(),
 
         landmark:
           String(
-            f.landmark || "",
+            f.landmark || ""
           ).trim(),
 
         area:
           String(
-            f.area || "",
+            f.area || ""
           ).trim(),
 
-        // IMPORTANT:
-        // Village is sent to the backend.
         village:
           String(
-            f.village || "",
+            f.village || ""
           ).trim(),
 
         city:
           String(
-            f.city || "",
+            f.city || ""
           ).trim(),
 
         district:
           String(
-            f.district || "",
+            f.district || ""
           ).trim(),
 
         state:
           String(
-            f.state || "",
+            f.state || ""
           ).trim(),
 
         postalCode:
           String(
-            f.postalCode || "",
+            f.postalCode || ""
           ).trim(),
 
         country:
           String(
-            f.country || "India",
+            f.country || "India"
           ).trim(),
 
         location:
@@ -248,21 +241,21 @@ export default function EditAddressPage() {
           method: "PUT",
 
           body: JSON.stringify(
-            payload,
+            payload
           ),
-        },
+        }
       );
 
       if (!d || d.success === false) {
         throw new Error(
           d?.message ||
-            "Failed to update address",
+            "Failed to update address"
         );
       }
 
       toast.success(
         d.message ||
-          "Address updated successfully",
+          "Address updated successfully"
       );
 
       // --------------------------------------------------------
@@ -276,7 +269,7 @@ export default function EditAddressPage() {
       try {
         const stored =
           sessionStorage.getItem(
-            "odicart_checkout_return",
+            "odicart_checkout_return"
           );
 
         if (stored) {
@@ -290,30 +283,29 @@ export default function EditAddressPage() {
 
             // Clear it after consuming it.
             sessionStorage.removeItem(
-              "odicart_checkout_return",
+              "odicart_checkout_return"
             );
           }
         }
       } catch (error) {
         console.warn(
           "Unable to read checkout return path:",
-          error,
+          error
         );
       }
 
-      setTimeout(() => {
-        window.location.href =
-          returnPath;
-      }, 500);
+      // Navigate immediately.
+      window.location.href =
+        returnPath;
     } catch (e) {
       console.error(
         "Update address error:",
-        e,
+        e
       );
 
       toast.error(
         e.message ||
-          "Failed to update address",
+          "Failed to update address"
       );
 
       setSaving(false);
@@ -342,7 +334,9 @@ export default function EditAddressPage() {
     return (
       <AccountShell title="Edit address">
         <div className="ok-card ok-empty">
-          <h3>Address not found</h3>
+          <h3>
+            Address not found
+          </h3>
 
           <p className="ok-muted">
             This address may have been
@@ -384,3 +378,4 @@ export default function EditAddressPage() {
     </AccountShell>
   );
 }
+

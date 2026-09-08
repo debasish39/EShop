@@ -359,7 +359,9 @@ export function authHeaders(json=false){
 export async function api(path, options={}){
   const res=await fetch(`${BACKEND_URL}${path}`,{...options,headers:{...authHeaders(options.body && typeof options.body==="string"),...(options.headers||{})}});
   let data={};
-  try{data=await res.json()}catch{}
+  try{data=await res.json()}catch(error){
+      console.error(error);
+  }
   if(!res.ok) throw new Error(data.message||"Request failed");
   return data;
 }

@@ -5,6 +5,7 @@ import React, {
   useState,
 } from "react";
 
+import { useNavigate } from "react-router-dom";
 import {
   FaArrowLeft,
   FaBell,
@@ -68,7 +69,7 @@ export default function ProfilePage() {
     useState(true);
 
   const lastScrollY = useRef(0);
-
+  const navigate = useNavigate();
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -81,11 +82,10 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (!token) {
-        window.location.href = "/sign-in";
-        return;
-      }
-
+    if (!token) {
+  navigate("/phone-login", { replace: true });
+  return;
+}
       try {
         const response = await fetch(
           `${BACKEND_URL}/api/auth/me`,
@@ -117,7 +117,7 @@ export default function ProfilePage() {
     };
 
     fetchUser();
-  }, [token]);
+  }, [token,navigate]);
 
   /* =====================================================
      NAVBAR SCROLL BEHAVIOR
@@ -174,9 +174,6 @@ export default function ProfilePage() {
      HELPERS
   ===================================================== */
 
-  const navigate = (path) => {
-    window.location.href = path;
-  };
 
   const memberSince = useMemo(() => {
     if (!user?.createdAt) {
@@ -436,11 +433,10 @@ export default function ProfilePage() {
   ===================================================== */
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+  localStorage.removeItem("token");
 
-    window.location.href = "/sign-in";
-  };
-
+  navigate("/phone-login", { replace: true });
+};
   /* =====================================================
      DELETE ACCOUNT
   ===================================================== */
@@ -475,7 +471,7 @@ export default function ProfilePage() {
       );
 
       setTimeout(() => {
-        window.location.href = "/";
+  navigate("/", { replace: true });
       }, 700);
     } catch (error) {
       console.error(error);
