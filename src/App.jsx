@@ -13,7 +13,7 @@ import {
 } from "react-router-dom";
 
 import axios from "axios";
-
+import PhoneLogin from "./pages/PhoneLogin";
 import { Toaster } from "sonner";
 
 import AOS from "aos";
@@ -927,7 +927,10 @@ const AppWrapper = () => {
                   <LegalPage />
                 }
               />
-
+              <Route
+  path="/phone-login"
+  element={<PhoneLogin />}
+/>
 
               {/* =================================================
                   404
